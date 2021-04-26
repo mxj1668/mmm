@@ -142,9 +142,10 @@ jobs:
         fi
          mv build/${{matrix.target}}/$CONFIG_FILE .config
         make defconfig
-        [ $(grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/') == generic ] && DEVICE_NAME=$(grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/CONFIG_TARGET_(.*)_DEVICE_.*=y/\1/') || DEVICE_NAME=$(grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/')
-        DEVICE_NAME=`echo ${DEVICE_NAME/Lede_x86_64}`
-        echo "::set-env name=DEVICE_NAME::$DEVICE_NAME"
+        source "${PATH1}/common.sh" && Diy_adgu
+        if [ "${REGULAR_UPDATE}" == "true" ]; then
+          source "${PATH1}/upgrade.sh" && Diy_Part2
+        fi
  
     - name: SSH远程连接（运行到此必须刷新一次网页再等待代码展开,不能频繁刷新）
       uses: garypang13/debugger-action@master
