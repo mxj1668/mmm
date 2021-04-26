@@ -143,7 +143,7 @@ jobs:
          mv build/${{matrix.target}}/$CONFIG_FILE .config
         make defconfig
         [ $(grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/') == generic ] && DEVICE_NAME=$(grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/CONFIG_TARGET_(.*)_DEVICE_.*=y/\1/') || DEVICE_NAME=$(grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/')
-        DEVICE_NAME=`echo ${DEVICE_NAME/xiaomi_redmi-router/redmi}`
+        DEVICE_NAME=`echo ${DEVICE_NAME/Lede_x86_64}`
         echo "::set-env name=DEVICE_NAME::$DEVICE_NAME"
  
     - name: SSH远程连接（运行到此必须刷新一次网页再等待代码展开,不能频繁刷新）
