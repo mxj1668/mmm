@@ -101,55 +101,50 @@ jobs:
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
         
-    - name: 下载${{matrix.target}}源码
+    - name: 下载固件源码
       working-directory: /workdir
       run: |
         df -hT $PWD
         git clone -b $REPO_BRANCH --single-branch $REPO_URL openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
-        cd openwrt
-        if [ build/${{matrix.target}} != build/openwrt ]; then
-          rm -rf package/ctcgfw/luci-app-argon-config
-          rm -rf package/lienol/luci-app-timecontrol
-          rm -rf package/ctcgfw/luci-theme-argonv3
-          rm -rf package/lean/luci-app-netdata
-          rm -rf package/lean/luci-theme-argon
-          rm -rf package/lean/k3screenctrl
-        fi
         
+
     - name: 加载源,patch补丁和自定义设置
       run: |
         cp -Rf `find ./ -maxdepth 1 -type d ! -path './openwrt' ! -path './'` openwrt
         cd openwrt
+        echo "Apply patches"
+        if [ -n "$(ls -A "build/${{matrix.target}}/patches" 2>/dev/null)" ]; then
+        (
+          find "build/${{matrix.target}}/patches" -type f -name '*.patch' -print0 | sort -z | xargs -I % -t -0 -n 1 sh -c "cat '%'  | patch -d './' -p0 --forward" || true
+        )
+        fi
         if [ -f "build/${{matrix.target}}/$DIY_P1_SH" ]; then
+        (
           chmod +x build/${{matrix.target}}/$DIY_P1_SH
           /bin/bash "build/${{matrix.target}}/$DIY_P1_SH"
+        )
         fi
-        if [ build/${{matrix.target}} != build/openwrt ]; then
-          git clone -b $REPO_BRANCH --single-branch https://github.com/281677160/openwrt-package package/danshui
-        fi
-        ./scripts/feeds clean && ./scripts/feeds update -a && ./scripts/feeds install -a && ./scripts/feeds install -a
-        if [ -f "build/${{matrix.target}}/$DIY_P2_SH" ]; then
-          chmod +x build/${{matrix.target}}/$DIY_P2_SH
-          /bin/bash "build/${{matrix.target}}/$DIY_P2_SH"
-        fi
-        if [ -n "$(ls -A "build/${{matrix.target}}/patches" 2>/dev/null)" ]; then
-          find "build/${{matrix.target}}/patches" -type f -name '*.patch' -print0 | sort -z | xargs -I % -t -0 -n 1 sh -c "cat '%'  | patch -d './' -p1 --forward --no-backup-if-mismatch"
-        fi
+        ./scripts/feeds clean
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
         if [ -n "$(ls -A "build/${{matrix.target}}/files" 2>/dev/null)" ]; then
          cp -rf build/${{matrix.target}}/files files
-         chmod -R 755 build/${{matrix.target}}/files/* ./
         fi
         if [ -n "$(ls -A "build/${{matrix.target}}/diy" 2>/dev/null)" ]; then
          cp -Rf build/${{matrix.target}}/diy/* ./
+        fi        
+        if [ -f "build/${{matrix.target}}/$DIY_P2_SH" ]; then
+        (
+          chmod +x build/${{matrix.target}}/$DIY_P2_SH
+          /bin/bash "build/${{matrix.target}}/$DIY_P2_SH"
+        )
         fi
-        [ -e build/${{matrix.target}}/$CONFIG_FILE ]
-        mv build/${{matrix.target}}/$CONFIG_FILE .config
+         mv build/${{matrix.target}}/$CONFIG_FILE .config
         make defconfig
-        git clone https://github.com/openwrt-dev/po2lmo.git
-        pushd po2lmo
-        make && sudo make install
-        popd
+        [ $(grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/') == generic ] && DEVICE_NAME=$(grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/CONFIG_TARGET_(.*)_DEVICE_.*=y/\1/') || DEVICE_NAME=$(grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/')
+        DEVICE_NAME=`echo ${DEVICE_NAME/xiaomi_redmi-router/redmi}`
+        echo "::set-env name=DEVICE_NAME::$DEVICE_NAME"
  
     - name: SSH远程连接（运行到此必须刷新一次网页再等待代码展开,不能频繁刷新）
       uses: garypang13/debugger-action@master
@@ -265,18 +260,4 @@ jobs:
         SCKEY: ${{ secrets.SCKEY }}
         text: 恭喜主人${{matrix.target}}固件编译成功！
         desp: 我亲爱的主人您要编译的${{ env.WXFB_MESSAGE }}固件成功编译完成了！
-              
-              
-              完成时间：${{ env.date1 }}
-              
-              
-              发布地址：${{ env.GITHUB_RELEASE }}
-              
-              
-              奶牛快传：${{ env.COWTRANSFER_URL }}
-              
-              
-              WeTransfer：${{ env.WETRANSFER_URL }}
-              
-              
-              祝小主人见人爱，花见花开，车见车载，天天好心情🎈！！！
+
