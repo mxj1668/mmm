@@ -113,34 +113,46 @@ jobs:
       run: |
         cp -Rf `find ./ -maxdepth 1 -type d ! -path './openwrt' ! -path './'` openwrt
         cd openwrt
-        echo "Apply patches"
-        if [ -n "$(ls -A "build/${{matrix.target}}/patches" 2>/dev/null)" ]; then
-        (
-          find "build/${{matrix.target}}/patches" -type f -name '*.patch' -print0 | sort -z | xargs -I % -t -0 -n 1 sh -c "cat '%'  | patch -d './' -p0 --forward" || true
-        )
+        source common/common.sh && Diy_all
+        if [ ${{matrix.target}} != "openwrt" ]; then
+          if [ "${REPO_URL}" == "https://github.com/coolsnowwolf/lede" ]; then
+            source common/common.sh && Diy_lede
+          fi
         fi
         if [ -f "build/${{matrix.target}}/$DIY_P1_SH" ]; then
-        (
           chmod +x build/${{matrix.target}}/$DIY_P1_SH
           /bin/bash "build/${{matrix.target}}/$DIY_P1_SH"
-        )
         fi
-        ./scripts/feeds clean
-        ./scripts/feeds update -a
-        ./scripts/feeds install -a
-        if [ -n "$(ls -A "build/${{matrix.target}}/files" 2>/dev/null)" ]; then
-         cp -rf build/${{matrix.target}}/files files
+        ./scripts/feeds clean && ./scripts/feeds update -a
+        ./scripts/feeds install -a && ./scripts/feeds install -a
+        source common/common.sh && Diy_all2
+        if [ "${REPO_URL}" == "https://github.com/coolsnowwolf/lede" ]; then
+          source common/common.sh && Diy_lede2
+          echo "NAME2=Lede-" >> $GITHUB_ENV
+          echo "Source=Lede" >> $GITHUB_ENV
+          echo "ZUOZHE=lean" >> $GITHUB_ENV
         fi
-        if [ -n "$(ls -A "build/${{matrix.target}}/diy" 2>/dev/null)" ]; then
-         cp -Rf build/${{matrix.target}}/diy/* ./
-        fi        
         if [ -f "build/${{matrix.target}}/$DIY_P2_SH" ]; then
-        (
           chmod +x build/${{matrix.target}}/$DIY_P2_SH
           /bin/bash "build/${{matrix.target}}/$DIY_P2_SH"
-        )
         fi
-         mv build/${{matrix.target}}/$CONFIG_FILE .config
+        if [ -n "$(ls -A "build/${{matrix.target}}/patches" 2>/dev/null)" ]; then
+          find "build/${{matrix.target}}/patches" -type f -name '*.patch' -print0 | sort -z | xargs -I % -t -0 -n 1 sh -c "cat '%'  | patch -d './' -p1 --forward --no-backup-if-mismatch"
+        fi
+        if [ -n "$(ls -A "build/${{matrix.target}}/files" 2>/dev/null)" ]; then
+          cp -rf build/${{matrix.target}}/files files
+          chmod -R 777 build/${{matrix.target}}/files/* ./
+        fi
+        if [ -n "$(ls -A "build/${{matrix.target}}/diy" 2>/dev/null)" ]; then
+          cp -Rf build/${{matrix.target}}/diy/* ./
+        fi
+        [ -e build/${{matrix.target}}/$CONFIG_FILE ] && mv build/${{matrix.target}}/$CONFIG_FILE .config
+        if [ ${{matrix.target}} != "openwrt" ]; then
+          if [ "${REGULAR_UPDATE}" == "true" ]; then
+            echo "Compile_Date=$(date +%Y%m%d-%H%M)" > $GITHUB_WORKSPACE/Openwrt.info
+            source common/upgrade.sh && Diy_Part1
+          fi
+        fi
  
     - name: SSH远程连接（运行到此必须刷新一次网页再等待代码展开,不能频繁刷新）
       uses: garypang13/debugger-action@master
