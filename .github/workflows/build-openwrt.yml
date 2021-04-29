@@ -128,8 +128,6 @@ jobs:
         if [ -n "$(ls -A "build/${{matrix.target}}/diy" 2>/dev/null)" ]; then
          cp -Rf build/${{matrix.target}}/diy/* ./
         fi
-        [ -e build/${{matrix.target}}/$CONFIG_FILE ]
-        mv build/${{matrix.target}}/$CONFIG_FILE .config
          
     - name: SSH远程连接（运行到此必须刷新一次网页再等待代码展开,不能频繁刷新）
       uses: garypang13/debugger-action@master
