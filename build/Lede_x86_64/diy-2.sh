@@ -10,9 +10,6 @@ sed -i "/uci commit network/i\uci set network.lan.broadcast='192.168.2.255'" $ZZ
 sed -i "/uci commit network/i\uci set network.lan.dns='223.5.5.5 114.114.114.114'" $ZZZ     # DNS(多个DNS要用空格分开)
 sed -i "/uci commit network/i\uci set network.lan.delegate='0'" $ZZZ                        # 去掉LAN口使用内置的 IPv6 管理
 
-# 修改openwrt登陆地址,把下面的192.168.2.2修改成你想要的就可以了
-sed -i 's/192.168.1.1/10.10.10.2/g' package/base-files/files/bin/config_generate
-
 # 修改主机名字，把OpenWrt-123修改你喜欢的就行（不能纯数字或者使用中文）
 sed -i '/uci commit system/i\uci set system.@system[0].hostname='OpenWrt'' package/lean/default-settings/files/zzz-default-settings
 
