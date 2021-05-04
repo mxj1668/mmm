@@ -109,6 +109,7 @@ jobs:
         cd openwrt
         if [ build/${{matrix.target}} != build/openwrt ]; then
           rm -rf package/lean/luci-theme-argon
+          rm -rf package/lean/luci-app-netdata
         fi
         
     - name: 加载源,patch补丁和自定义设置
