@@ -5,7 +5,7 @@ sed -i "/uci commit fstab/a\uci commit network" package/lean/default-settings/fi
 sed -i "/uci commit network/i\uci set network.lan.ipaddr='10.10.10.2'" package/lean/default-settings/files/zzz-default-settings                  # IPv4 地址(openwrt后台地址)
 sed -i "/uci commit network/i\uci set network.lan.netmask='255.255.255.0'" package/lean/default-settings/files/zzz-default-settingsZ             # IPv4 子网掩码
 sed -i "/uci commit network/i\uci set network.lan.gateway='10.10.10.1'" package/lean/default-settings/files/zzz-default-settings                 # IPv4 网关
-sed -i "/uci commit network/i\uci set network.lan.broadcast='192.168.2.255'" package/lean/default-settings/files/zzz-default-settings            # IPv4 广播
+sed -i "/uci commit network/i\uci set network.lan.broadcast='10.10.10.255'" package/lean/default-settings/files/zzz-default-settings             # IPv4 广播
 sed -i "/uci commit network/i\uci set network.lan.dns='223.5.5.5 114.114.114.114'" package/lean/default-settings/files/zzz-default-settings      # DNS(多个DNS要用空格分开)
 sed -i "/uci commit network/i\uci set network.lan.delegate='0'" package/lean/default-settings/files/zzz-default-settings                         # 去掉LAN口使用内置的 IPv6 管理
 
