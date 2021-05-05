@@ -1,9 +1,16 @@
 #!/bin/bash
 # Copyright (c) 2019-2020 P3TERX <https://p3terx.com>
 #
+sed -i "/uci commit fstab/a\uci commit network" package/lean/default-settings/files/zzz-default-settings
+sed -i "/uci commit network/i\uci set network.lan.ipaddr='10.10.10.2'" package/lean/default-settings/files/zzz-default-settings                  # IPv4 地址(openwrt后台地址)
+sed -i "/uci commit network/i\uci set network.lan.netmask='255.255.255.0'" package/lean/default-settings/files/zzz-default-settingsZ             # IPv4 子网掩码
+sed -i "/uci commit network/i\uci set network.lan.gateway='10.10.10.1'" package/lean/default-settings/files/zzz-default-settings                 # IPv4 网关
+#sed -i "/uci commit network/i\uci set network.lan.broadcast='192.168.2.255'" package/lean/default-settings/files/zzz-default-settings           # IPv4 广播
+sed -i "/uci commit network/i\uci set network.lan.dns='223.5.5.5 114.114.114.114'" package/lean/default-settings/files/zzz-default-settings      # DNS(多个DNS要用空格分开)
+sed -i "/uci commit network/i\uci set network.lan.delegate='0'" package/lean/default-settings/files/zzz-default-settings                         # 去掉LAN口使用内置的 IPv6 管理
 
 # 修改openwrt登陆地址,把下面的192.168.2.2修改成你想要的就可以了
-sed -i 's/192.168.1.1/10.10.10.2/g' package/base-files/files/bin/config_generate
+#sed -i 's/192.168.1.1/10.10.10.2/g' package/base-files/files/bin/config_generate
 
 # 修改主机名字，把OpenWrt-123修改你喜欢的就行（不能纯数字或者使用中文）
 sed -i '/uci commit system/i\uci set system.@system[0].hostname='OpenWrt'' package/lean/default-settings/files/zzz-default-settings
