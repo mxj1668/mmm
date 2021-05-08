@@ -2,7 +2,7 @@
 # Copyright (c) 2019-2020 P3TERX <https://p3terx.com>
 #
 sed -i "/uci commit fstab/a\uci commit network" package/lean/default-settings/files/zzz-default-settings
-sed -i "/uci commit network/i\uci set network.lan.ipaddr='10.10.10.1'" package/lean/default-settings/files/zzz-default-settings                  # IPv4 地址(openwrt后台地址)
+sed -i "/uci commit network/i\uci set network.lan.ipaddr='10.10.10.3'" package/lean/default-settings/files/zzz-default-settings                  # IPv4 地址(openwrt后台地址)
 sed -i "/uci commit network/i\uci set network.lan.netmask='255.255.255.0'" package/lean/default-settings/files/zzz-default-settings              # IPv4 子网掩码
 sed -i "/uci commit network/i\uci set network.lan.gateway='10.10.10.1" package/lean/default-settings/files/zzz-default-settings                  # IPv4 网关
 sed -i "/uci commit network/i\uci set network.lan.broadcast='10.10.10.200'" package/lean/default-settings/files/zzz-default-settings             # IPv4 广播
